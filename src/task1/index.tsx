@@ -1,20 +1,35 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import "./index.scss";
+import { useFetch } from './hooks/useFetch';
 
 
 const Task1: FC = () => {
+  const [page, setPage] = useState<number>(0);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
-  // Use this api endpoint to get a list of users
-  // https://api.github.com/users
+  const { data, isLoading, error } = useFetch(page, searchTerm);
+
+  const hasPrev = page > 0;
+  const hasNext = data && data.length === 10;
+  
+  const users = data?.map(user => (
+    <li key={user.id}>{user.login}</li>
+  )) || [];
 
   return (
     <div className="dashboard">
-      {/* show the loading state here */}
-      {/* show the error if any here */}
-      {/* show the input search here*/}
+      {isLoading && (<p>Loading...</p>)}
+      {error}
+      <input
+        type="text" value={searchTerm}
+        onChange={event => setSearchTerm(event.target.value)}
+        data-testid="search-input"
+      />
       <ul>
-        {/* show the filtered users here */}
+        {users}
       </ul>
+      <button disabled={!hasPrev} onClick={() => setPage(page - 1)}>Prev</button>
+      <button disabled={!hasNext} onClick={() => setPage(page + 1)}>Next</button>
     </div>
   );
 };
